@@ -157,11 +157,10 @@ Do **not** require a custom `APP_URL` on Vercel — OAuth uses the request host,
 
 `/api/rivet` sets `maxDuration: 800` + `memory: 2048` (Vercel Pro) so agentOS
 wakes stay inside one `/start` lifespan and cold starts clear Rivet's 30s
-actor-start threshold. Pool timings are upserted by the app via `configurePool`:
-`request_lifespan 790s` (< maxDuration), `drain_grace_period 30s`,
-`metadata_poll_interval 10s`. A `vercel-build` prebuild prunes non-runtime
-Rivet platform binaries (WASM fallback covers the gap) so the function stays
-under the 250MB unzipped limit.
+actor-start threshold. In the Rivet dashboard runner pool, keep
+`request_lifespan` at or under that (we use **790s**) and `drain_grace_period`
+strictly below it (**30s**; the 1800s default is invalid). The app never
+upserts pool config in production — dashboard is the source of truth.
 
 ---
 
