@@ -29,6 +29,15 @@ export async function verifyActorToken(token: string): Promise<string> {
 	}
 }
 
+/**
+ * WebSocket origin allowlist — Rivet has no WS CORS, so this is the only check.
+ *
+ * Missing Origin is allowed: Rivet Cloud → `/api/rivet/start` and server-side
+ * action handles (OAuth callback, actor-to-actor) are not browsers and send no
+ * Origin. Real ACL is still `createConnState` (JWT / internal secret). When a
+ * browser *does* send Origin, it must be on ALLOWED_ORIGINS (empty list is a
+ * hard deny in production).
+ */
 export function guardOrigin(request?: Request): void {
 	const origins = allowedOrigins();
 	if (origins.length === 0) {
@@ -36,10 +45,7 @@ export function guardOrigin(request?: Request): void {
 		throw new UserError('Origin not allowed', { code: 'origin_not_allowed' });
 	}
 	const origin = request?.headers.get('origin');
-	if (!origin) {
-		if (isLocalDev()) return;
-		throw new UserError('Origin required', { code: 'origin_required' });
-	}
+	if (!origin) return;
 	if (!origins.includes(origin)) {
 		throw new UserError('Origin not allowed', { code: 'origin_not_allowed' });
 	}
