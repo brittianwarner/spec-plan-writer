@@ -1,0 +1,1 @@
+{"version":3,"file":"runes-shim.d.ts","sourceRoot":"","sources":["../../src/lib/__tests__/runes-shim.ts"],"names":[],"mappings":"AAAA,QAAA,MAAM,MAAM,EAAkD;IAC5D,CAAC,EAAE,CAAC,EAAE,MAAM,OAAO,GAAG,OAAO,CAAC;IAC9B,IAAI,EAAE,CAAC,EAAE,EAAE,MAAM,IAAI,GAAG,CAAC,MAAM,IAAI,CAAC,KAAK,MAAM,IAAI,CAAC;CACrD,CAAC;AAOF,QAAA,MAAM,KAAK,EAA8C,OAAO,MAAM,CAAC"}

@@ -1,0 +1,217 @@
+@import 'tailwindcss';
+@plugin '@tailwindcss/typography';
+
+@theme {
+	--color-spw-bg: #0a0c10;
+	--color-spw-panel: #10141c;
+	--color-spw-panel-2: #141a24;
+	--color-spw-border: #1e2530;
+	--color-spw-border-strong: #30363d;
+	--color-spw-text: #c9d1d9;
+	--color-spw-fg: #c9d1d9;
+	--color-spw-muted: #8b949e;
+	--color-spw-faint: #6e7681;
+	--color-spw-green: #3fb950;
+	--color-spw-amber: #d29922;
+	--color-spw-red: #f85149;
+	--color-spw-blue: #58a6ff;
+	--color-spw-purple: #a371f7;
+	--font-mono:
+		'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono',
+		'Courier New', monospace;
+	--radius-spw: 4px;
+	--radius-spw-lg: 6px;
+}
+
+html,
+body {
+	height: 100%;
+	background: var(--color-spw-bg);
+	color: var(--color-spw-text);
+	font-family: var(--font-mono);
+	font-size: 13px;
+	line-height: 1.5;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+::selection {
+	background: color-mix(in srgb, var(--color-spw-blue) 35%, transparent);
+	color: #ffffff;
+}
+
+* {
+	scrollbar-width: thin;
+	scrollbar-color: var(--color-spw-border-strong) transparent;
+}
+
+*::-webkit-scrollbar {
+	width: 8px;
+	height: 8px;
+}
+
+*::-webkit-scrollbar-track {
+	background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+	background: var(--color-spw-border-strong);
+	border-radius: 4px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+	background: var(--color-spw-faint);
+}
+
+a {
+	color: var(--color-spw-blue);
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+	text-underline-offset: 2px;
+}
+
+:focus-visible {
+	outline: 1px solid var(--color-spw-blue);
+	outline-offset: 2px;
+}
+
+.spw-panel {
+	background: var(--color-spw-panel);
+	border: 1px solid var(--color-spw-border);
+	border-radius: var(--radius-spw);
+}
+
+.spw-border {
+	border-color: var(--color-spw-border);
+}
+
+.spw-btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 0.4rem;
+	padding: 0.35rem 0.7rem;
+	border: 1px solid var(--color-spw-border);
+	border-radius: var(--radius-spw);
+	background: var(--color-spw-panel-2);
+	color: var(--color-spw-text);
+	font: inherit;
+	font-size: 12px;
+	line-height: 1.25;
+	cursor: pointer;
+	transition:
+		background 120ms ease,
+		border-color 120ms ease,
+		color 120ms ease;
+}
+
+.spw-btn:hover:not(:disabled) {
+	background: #1a2130;
+	border-color: var(--color-spw-border-strong);
+}
+
+.spw-btn:disabled {
+	opacity: 0.45;
+	cursor: not-allowed;
+}
+
+.spw-btn-primary {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 0.4rem;
+	padding: 0.35rem 0.7rem;
+	border-radius: var(--radius-spw);
+	font: inherit;
+	font-size: 12px;
+	line-height: 1.25;
+	cursor: pointer;
+	transition:
+		background 120ms ease,
+		border-color 120ms ease,
+		color 120ms ease;
+	background: color-mix(in srgb, var(--color-spw-green) 18%, var(--color-spw-panel));
+	border: 1px solid color-mix(in srgb, var(--color-spw-green) 45%, var(--color-spw-border));
+	color: var(--color-spw-green);
+}
+
+.spw-btn-primary:disabled {
+	opacity: 0.45;
+	cursor: not-allowed;
+}
+
+.spw-btn-primary:hover:not(:disabled) {
+	background: color-mix(in srgb, var(--color-spw-green) 28%, var(--color-spw-panel));
+	border-color: var(--color-spw-green);
+	color: #56d364;
+}
+
+.spw-input {
+	width: 100%;
+	padding: 0.45rem 0.65rem;
+	border: 1px solid var(--color-spw-border);
+	border-radius: var(--radius-spw);
+	background: var(--color-spw-bg);
+	color: var(--color-spw-text);
+	font: inherit;
+	font-size: 12px;
+	outline: none;
+}
+
+.spw-input::placeholder {
+	color: var(--color-spw-faint);
+}
+
+.spw-input:focus {
+	border-color: var(--color-spw-blue);
+	box-shadow: 0 0 0 1px color-mix(in srgb, var(--color-spw-blue) 40%, transparent);
+}
+
+.spw-dot-red,
+.spw-dot-amber,
+.spw-dot-green,
+.spw-dot-blue,
+.spw-dot-muted {
+	display: inline-block;
+	width: 8px;
+	height: 8px;
+	border-radius: 9999px;
+	flex-shrink: 0;
+}
+
+.spw-dot-red {
+	background: var(--color-spw-red);
+}
+
+.spw-dot-amber {
+	background: var(--color-spw-amber);
+}
+
+.spw-dot-green {
+	background: var(--color-spw-green);
+}
+
+.spw-dot-blue {
+	background: var(--color-spw-blue);
+}
+
+.spw-dot-muted {
+	background: var(--color-spw-faint);
+}
+
+@keyframes spw-pulse {
+	0%,
+	100% {
+		opacity: 1;
+	}
+	50% {
+		opacity: 0.35;
+	}
+}
+
+.spw-pulse {
+	animation: spw-pulse 1.4s ease-in-out infinite;
+}
