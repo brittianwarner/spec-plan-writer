@@ -7,10 +7,11 @@
  *
  * @see https://rivet.dev/docs/general/runtime-modes
  * @see https://rivet.dev/docs/deploy/vercel
+ * @see https://rivet.dev/docs/general/pool-configuration
  */
 
 import { setup } from '@rivet-dev/agentos';
-import { isLocalDev } from './env.ts';
+import { env, isLocalDev } from './env.ts';
 import { user } from './user/index.ts';
 import { vm } from './vm.ts';
 import { specPlan } from './spec-plan/index.ts';
@@ -18,22 +19,48 @@ import { specPlanRun } from './spec-plan-run/index.ts';
 import { specPlanWorker } from './spec-plan-worker/index.ts';
 
 /**
- * Local-dev only: where the bundled engine should call back to reach us.
- * Prefer 127.0.0.1 over localhost — Vite is often IPv4-only and `localhost` →
- * ::1 makes every actor wake time out.
+ * Vercel function maxDuration is 300s (Pro). Rivet's request_lifespan must be
+ * strictly under the platform timeout. drain_grace_period is reserved *inside*
+ * that lifespan for clean actor stop — it MUST be less than request_lifespan.
  *
- * Override with `RIVET_DEV_SERVERLESS_URL` if Vite is not on :5173.
+ * Dashboard default drain_grace_period is 1800s, which is invalid when
+ * request_lifespan is ~295. We upsert both values via configurePool so the
+ * provider config is always valid: runtime ·288s + grace ·30s ≤ 300.
  */
-const DEV_SERVERLESS_URL = 'http://127.0.0.1:5173/api/rivet';
+const REQUEST_LIFESPAN_SEC = 280;
+const DRAIN_GRACE_PERIOD_SEC = 30;
 
 const local = isLocalDev();
 
+/**
+ * URL Rivet Cloud (prod) or the local engine (dev) calls for /start + /metadata.
+ * Prefer RIVET_SERVERLESS_URL; otherwise APP_URL + /api/rivet; else loopback dev.
+ */
+function serverlessPoolUrl(): string | undefined {
+	const explicit = env('RIVET_SERVERLESS_URL') ?? env('RIVET_DEV_SERVERLESS_URL');
+	if (explicit) return explicit.replace(/\/$/, '');
+	const app = env('APP_URL')?.replace(/\/$/, '');
+	if (app) return `${app}/api/rivet`;
+	if (local) return 'http://127.0.0.1:5173/api/rivet';
+	return undefined;
+}
+
+const poolUrl = serverlessPoolUrl();
+
 export const registry = setup({
 	use: { user, vm, specPlan, specPlanRun, specPlanWorker },
-	// Both flip together — configurePool is rejected without startEngine/endpoint.
+	// Local: start bundled engine. Prod: RIVET_ENDPOINT points at Rivet Cloud.
 	startEngine: local ? true : undefined,
-	configurePool: local
-		? { url: process.env.RIVET_DEV_SERVERLESS_URL?.trim() || DEV_SERVERLESS_URL }
+	// Upserts runner pool config (lifespan + drain grace) against the engine.
+	// Required so dashboard defaults cannot ship drain_grace=1800 with
+	// request_lifespan≈295 (Invalid runner config).
+	// Needs endpoint (RIVET_ENDPOINT) or startEngine.
+	configurePool: poolUrl
+		? {
+				url: poolUrl,
+				requestLifespan: REQUEST_LIFESPAN_SEC,
+				drainGracePeriod: DRAIN_GRACE_PERIOD_SEC
+			}
 		: undefined
 });
 
