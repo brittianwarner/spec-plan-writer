@@ -144,16 +144,13 @@ Compute runner mode (not required for the default serverless path).
 4. In Rivet, configure a **serverless provider** whose URL is
    `https://your-app.vercel.app/api/rivet` (or use
    [`rivet-dev/preview-namespace-action`](https://github.com/rivet-dev/preview-namespace-action)
-   for PR previews).
-5. **Pool timings** — required constraint:
-   - `request_lifespan` ≤ Vercel `maxDuration` (we use **280s**, function is 300s)
-   - `drain_grace_period` **<** `request_lifespan` (we use **30s**)
-   - Default grace is **1800s**, which fails with `Invalid runner config:
-     drain_grace_period must be less than request_lifespan (1800s >= 295s)`.
-   - The app upserts 280/30 via `configurePool` on first `/api/rivet` hit when
-     `APP_URL` (or `RIVET_SERVERLESS_URL`) + `RIVET_ENDPOINT` are set. You can
-     also set the same values in the Rivet dashboard runner pool editor.
-6. If **Vercel Deployment Protection** is on, add header
+   for PR previews). Leave **all** pool fields at Rivet defaults except:
+   - `request_lifespan` — keep/autoset under Vercel `maxDuration` (**300s** here;
+     dashboard often lands on ~295). Do not raise above the function limit.
+   - `drain_grace_period` — default **1800s** is invalid with a ~300s lifespan.
+     Set grace to **~10–30s** only (rule: grace **<** lifespan). Everything
+     else stays default.
+5. If **Vercel Deployment Protection** is on, add header
    `x-vercel-protection-bypass` on the Rivet provider (see
    [deploy docs](https://rivet.dev/docs/deploy/vercel#troubleshooting)).
 
