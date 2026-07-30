@@ -133,13 +133,14 @@ Compute runner mode (not required for the default serverless path).
 | Var | Notes |
 | --- | --- |
 | `GITHUB_CLIENT_ID` / `GITHUB_CLIENT_SECRET` | OAuth App callback = `https://<app>/auth/github/callback` |
+| `ALLOWED_ORIGINS` | optional; full origin(s) or host. Falls back to Vercel’s `VERCEL_URL` / production URL |
 | `AUTH_SECRET` / `INTERNAL_SECRET` | `openssl rand -hex 32` each |
 | `RIVET_ENDPOINT` | `https://<ns>:sk_****@api.rivet.dev` (**required** on Vercel) |
 | `RIVET_PUBLIC_ENDPOINT` | `https://<ns>:pk_****@api.rivet.dev` |
-| `ALLOWED_ORIGINS` | `https://your-app.vercel.app` |
-| `APP_URL` | `https://your-app.vercel.app` |
 | `BLOB_READ_WRITE_TOKEN` | optional Blob store |
 | `SPEC_S3_*` | optional shared agent FS |
+
+Do **not** require a custom `APP_URL` on Vercel — OAuth uses the request host, and actor origin allowlisting uses `ALLOWED_ORIGINS` and/or Vercel’s built-in `VERCEL_URL`.
 
 4. In Rivet, configure a **serverless provider** whose URL is
    `https://your-app.vercel.app/api/rivet` (or use

@@ -33,15 +33,22 @@ export function internalSecret(): string {
  * WebSocket origin allowlist for browser actor connections. Rivet has no
  * WebSocket CORS — this check is the only one there is.
  *
- * Entries may be full origins (`https://app.example.com`) or bare hosts
- * (`app.example.com`) — bare hosts are expanded to `https://…` (and `http://…`
- * in local dev). Empty list: hard deny against Rivet Cloud; allow in local dev.
- * Falls back to `APP_URL` when ALLOWED_ORIGINS is unset.
+ * Sources (merged, first match not required — all are allowlisted):
+ *   1. `ALLOWED_ORIGINS` — comma-separated origins or bare hosts
+ *   2. `VERCEL_URL` — Vercel system env (deployment host, no scheme)
+ *   3. `VERCEL_PROJECT_PRODUCTION_URL` — production host when set
+ *   4. `APP_URL` — optional custom public origin (not a Vercel builtin)
+ *
+ * Bare hosts expand to `https://…` and `http://…`. Empty list: hard deny
+ * against Rivet Cloud; allow in local dev.
  */
 export function allowedOrigins(): string[] {
 	const raw = [
 		...(env('ALLOWED_ORIGINS') ?? '').split(','),
-		// Convenience fallback so a single APP_URL is enough on Vercel.
+		// Vercel system vars (always present on Vercel builds/runtime).
+		env('VERCEL_URL') ?? '',
+		env('VERCEL_PROJECT_PRODUCTION_URL') ?? '',
+		// Optional app-owned override (not injected by Vercel).
 		env('APP_URL') ?? ''
 	]
 		.map((o) => o.trim())
@@ -56,16 +63,14 @@ export function allowedOrigins(): string[] {
 
 /** Expand a configured allowlist entry into one or more comparable Origin values. */
 function normalizeOriginEntry(entry: string): string[] {
-	// Already a full origin?
 	if (/^https?:\/\//i.test(entry)) {
 		try {
 			const u = new URL(entry);
-			return [`${u.protocol}//${u.host}`]; // drop path/query
+			return [`${u.protocol}//${u.host}`];
 		} catch {
 			return [entry.replace(/\/$/, '')];
 		}
 	}
-	// Bare host (common Vercel mistake) → https + http variants
 	const host = entry.replace(/\/$/, '');
 	return [`https://${host}`, `http://${host}`];
 }
