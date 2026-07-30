@@ -41,13 +41,16 @@
 		userStore.bind(userActor as unknown as Parameters<typeof userStore.bind>[0]);
 		(async () => {
 			try {
+				// Cold serverless wakes regularly exceed 10s; give Rivet room.
 				const start = Date.now();
-				while (!userActor.isConnected && Date.now() - start < 10_000) {
-					await new Promise((r) => setTimeout(r, 40));
+				const deadline = 30_000;
+				while (!userActor.isConnected && Date.now() - start < deadline) {
+					await new Promise((r) => setTimeout(r, 50));
 					if (cancelled) return;
 				}
 				if (!userActor.isConnected) {
-					error = 'Could not connect to your user actor. Refresh to retry.';
+					error =
+						'Could not connect to your user actor. Check ALLOWED_ORIGINS is a full origin (https://…) and refresh.';
 					return;
 				}
 				await userStore.sync();
