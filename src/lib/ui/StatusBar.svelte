@@ -30,7 +30,7 @@
 </script>
 
 <footer
-	class="shrink-0 flex items-center gap-3 px-3 py-1.5 border-t border-spw-border bg-spw-panel text-[11px] text-spw-muted"
+	class="fixed bottom-0 inset-x-0 z-50 flex items-center gap-3 px-3 py-1.5 border-t border-spw-border bg-spw-panel text-[11px] text-spw-muted"
 >
 	<span class="inline-flex items-center gap-2 min-w-0">
 		{#if avatarUrl}

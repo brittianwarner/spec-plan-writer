@@ -69,7 +69,7 @@
 	});
 </script>
 
-<div class="min-h-full flex flex-col pb-10">
+<div class="min-h-full flex flex-col pb-14">
 	{#if error}
 		<div class="p-6 text-spw-red text-sm">{error}</div>
 	{:else if !ready}

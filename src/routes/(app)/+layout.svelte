@@ -36,12 +36,12 @@
 </script>
 
 {#if tokenError}
-	<div class="min-h-full flex flex-col pb-10">
+	<div class="min-h-full flex flex-col pb-14">
 		<div class="p-6 text-spw-red text-sm">{tokenError}</div>
 		<StatusBar login={sessionLogin} avatarUrl={sessionAvatar} keyStatus="unset" connected={false} />
 	</div>
 {:else if !tokenReady}
-	<div class="min-h-full flex flex-col pb-10">
+	<div class="min-h-full flex flex-col pb-14">
 		<div class="p-6 text-spw-muted text-sm">minting actor token…</div>
 		<StatusBar login={sessionLogin} avatarUrl={sessionAvatar} keyStatus="unset" connected={false} />
 	</div>

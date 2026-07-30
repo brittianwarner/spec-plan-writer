@@ -4,17 +4,22 @@
  * Browser clients go through `$lib/client/rivet` → `${origin}/api/rivet`
  * metadata discovery. This module is under `$lib/server/` so it never ships
  * client-side (`RIVET_ENDPOINT` carries a secret `sk_` token).
+ *
+ * NOTE: this module must NOT import the actor registry — a static (or
+ * statically analyzable dynamic) import would pull agentOS + the 131MB pi
+ * asset into every Vercel function that touches Rivet (OAuth callback,
+ * logout), tripling cold-start weight for no benefit. Local dev warms the
+ * engine over HTTP instead.
  */
 
 import { createClient, type Client } from '@rivet-dev/agentos/client';
 import { env } from '$env/dynamic/private';
+import { dev } from '$app/environment';
 import type { Registry } from '$lib/actors/registry';
 
 /**
  * Local dev default. When `RIVET_ENDPOINT` is unset, RivetKit runs an engine on
- * this port (started via `startEngine` on the registry). That fallback is fine
- * locally and fatal on Vercel (read-only FS) — hence the env var is required in
- * every deployed environment.
+ * this port (started via `startEngine` on the registry, inside `/api/rivet`).
  */
 const LOCAL_ENDPOINT = 'http://localhost:6420';
 
@@ -22,14 +27,31 @@ let client: Client<Registry> | undefined;
 let localEngineReady: Promise<void> | undefined;
 
 /**
- * Ensure the registry module is evaluated in local dev so `startEngine: true`
- * brings up the engine before the first actor call (OAuth often hits Rivet
- * before any browser `/api/rivet` request).
+ * Ensure the local engine is running before the first actor call in dev.
+ *
+ * Hitting our own `/api/rivet/metadata` loads the registry module (which has
+ * `startEngine: true` locally) inside the Vite dev server. The engine spawn is
+ * idempotent; failures are swallowed because a later call retries.
  */
 function ensureLocalEngine(): Promise<void> {
-	if (env.RIVET_ENDPOINT) return Promise.resolve();
+	if (!dev || env.RIVET_ENDPOINT) return Promise.resolve();
 	if (!localEngineReady) {
-		localEngineReady = import('$lib/actors/registry').then(() => undefined);
+		localEngineReady = (async () => {
+			const base = (
+				env.RIVET_DEV_SERVERLESS_URL ?? 'http://127.0.0.1:5173/api/rivet'
+			).replace(/\/$/, '');
+			// Loads the registry in the dev server → startEngine spawns on :6420.
+			await fetch(`${base}/metadata`).catch(() => undefined);
+			// Poll until the engine is actually listening (spawn is async).
+			const deadline = Date.now() + 10_000;
+			while (Date.now() < deadline) {
+				const up = await fetch('http://127.0.0.1:6420/')
+					.then(() => true)
+					.catch(() => false);
+				if (up) return;
+				await new Promise((r) => setTimeout(r, 150));
+			}
+		})();
 	}
 	return localEngineReady;
 }

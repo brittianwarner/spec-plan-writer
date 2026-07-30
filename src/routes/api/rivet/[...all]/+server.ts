@@ -18,9 +18,16 @@
 import { registry } from '$lib/actors/registry';
 import type { RequestHandler } from './$types';
 
-/** Keep long agentOS wake requests alive on Vercel (Pro: up to 300s). */
+/**
+ * Serverless runner function settings (Vercel Pro):
+ * - maxDuration 800s: long agentOS wakes/sessions stay inside one /start
+ *   lifespan. Rivet request_lifespan (790s) must stay under this.
+ * - memory 2048 MB: doubles CPU vs the 1024 default — faster cold starts,
+ *   which keeps actor wake under Rivet's 30s start threshold.
+ */
 export const config = {
-	maxDuration: 300
+	maxDuration: 800,
+	memory: 2048
 };
 
 const handle: RequestHandler = async ({ request }) => {

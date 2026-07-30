@@ -155,8 +155,13 @@ Do **not** require a custom `APP_URL` on Vercel — OAuth uses the request host,
    `x-vercel-protection-bypass` on the Rivet provider (see
    [deploy docs](https://rivet.dev/docs/deploy/vercel#troubleshooting)).
 
-`/api/rivet` sets `maxDuration: 300` so agentOS wakes are less likely to be cut
-short (requires a Vercel plan that allows it; Hobby is lower).
+`/api/rivet` sets `maxDuration: 800` + `memory: 2048` (Vercel Pro) so agentOS
+wakes stay inside one `/start` lifespan and cold starts clear Rivet's 30s
+actor-start threshold. Pool timings are upserted by the app via `configurePool`:
+`request_lifespan 790s` (< maxDuration), `drain_grace_period 30s`,
+`metadata_poll_interval 10s`. A `vercel-build` prebuild prunes non-runtime
+Rivet platform binaries (WASM fallback covers the gap) so the function stays
+under the 250MB unzipped limit.
 
 ---
 
