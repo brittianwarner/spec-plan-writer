@@ -9,7 +9,8 @@ declare global {
 				name: string | null;
 				avatarUrl: string | null;
 			} | null;
-			rivetPublicEndpoint: string;
+			/** Publishable Rivet endpoint (`pk_`). Undefined in local serverless dev. */
+			rivetPublicEndpoint: string | undefined;
 		}
 		// interface PageState {}
 		// interface Platform {}

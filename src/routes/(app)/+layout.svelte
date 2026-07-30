@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { ensureActorToken, getRivet, initRivetEndpoint, rivetContext } from '$lib/client/rivet';
+	import { ensureActorToken, getRivet, rivetContext } from '$lib/client/rivet';
 	import { StatusBar } from '$lib/ui';
 	import UserShell from './UserShell.svelte';
 
@@ -9,13 +9,11 @@
 	/* svelte-ignore state_referenced_locally -- layout data is fixed for the session */
 	const userId = data.user.userId;
 	/* svelte-ignore state_referenced_locally */
-	const rivetEndpoint = data.rivetPublicEndpoint;
-	/* svelte-ignore state_referenced_locally */
 	const sessionLogin = data.user.login;
 	/* svelte-ignore state_referenced_locally */
 	const sessionAvatar = data.user.avatarUrl;
 
-	initRivetEndpoint(rivetEndpoint);
+	// Browser always dials this origin's /api/rivet (metadata → WS).
 	rivetContext.set(getRivet());
 
 	let tokenReady = $state(false);

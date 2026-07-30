@@ -1,25 +1,33 @@
+/**
+ * Browser Rivet client — one shared transport for the whole app.
+ *
+ * The endpoint is this origin's `/api/rivet` mount: metadata discovery, then the
+ * browser opens its WebSocket to Rivet Cloud (or the local engine on :6420).
+ *
+ * @see https://rivet.dev/docs/deploy/vercel
+ */
+
 import { browser } from '$app/environment';
 import { createClient, createRivetContext, createSharedRivetKit } from '@rivetkit/svelte';
 import type { registry } from '$lib/actors/registry';
 
 export const rivetContext = createRivetContext<typeof registry>('SpecPlanWriter');
 
-let endpoint = 'http://localhost:6420';
-let client: ReturnType<typeof createClient<typeof registry>> | null = null;
-
-export function initRivetEndpoint(publicEndpoint: string) {
-	if (!browser) return;
-	if (endpoint !== publicEndpoint || !client) {
-		endpoint = publicEndpoint;
-		client = createClient<typeof registry>({ endpoint });
-	}
-}
-
-const getClient = () => {
-	if (!browser) throw new Error('Rivet client is browser-only');
-	if (!client) client = createClient<typeof registry>({ endpoint });
-	return client;
-};
+/** Lazy singleton — created only in the browser. */
+const getClient = (() => {
+	let client: ReturnType<typeof createClient<typeof registry>> | null = null;
+	return () => {
+		if (!browser) {
+			throw new Error('Rivet client is browser-only');
+		}
+		if (!client) {
+			client = createClient<typeof registry>({
+				endpoint: `${window.location.origin}/api/rivet`
+			});
+		}
+		return client;
+	};
+})();
 
 export const getRivet = createSharedRivetKit<typeof registry>(getClient, {
 	actionDefaults: { timeout: 60_000, throwOnError: false, guardConnection: true }

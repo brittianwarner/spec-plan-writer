@@ -9,7 +9,11 @@ export const GET: RequestHandler = async ({ request }) => {
 
 	const token = await mintActorToken(user.userId);
 	return json(
-		{ token, endpoint: getRivetPublicEndpoint() },
+		{
+			token,
+			// Optional; clients use same-origin `/api/rivet` regardless.
+			endpoint: getRivetPublicEndpoint() ?? null
+		},
 		{ headers: { 'cache-control': 'private, no-store' } }
 	);
 };

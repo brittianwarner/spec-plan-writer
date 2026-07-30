@@ -1,7 +1,15 @@
 import { env } from '$env/dynamic/private';
 
+/**
+ * Public origin used for OAuth redirect_uri.
+ * Honors `APP_URL` when set; otherwise derives from the request.
+ * Prefer browsing at http://127.0.0.1:5173 locally so redirect_uri matches
+ * the GitHub OAuth App and Rivet's IPv4 pool URL.
+ */
 export function appOrigin(url: URL): string {
-	return env.APP_URL?.replace(/\/$/, '') || `${url.protocol}//${url.host}`;
+	const configured = env.APP_URL?.replace(/\/$/, '');
+	if (configured) return configured;
+	return `${url.protocol}//${url.host}`;
 }
 
 export function githubAuthorizeUrl(state: string, redirectUri: string): string {

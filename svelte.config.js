@@ -5,9 +5,9 @@ import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
 const config = {
 	preprocess: vitePreprocess(),
 	kit: {
-		// Actors (and agentOS) run on Rivet Compute, not Vercel. No need to
-		// externalize the agentOS package here — the frontend only type-imports
-		// the registry anduses rivetkit/client.
+		// One deployable: UI + Rivet serverless mount at `/api/rivet/*`.
+		// Browser WS goes to Rivet Cloud; Rivet Cloud HTTPS-callbacks this origin.
+		// @see https://rivet.dev/docs/deploy/vercel
 		adapter: adapter()
 	}
 };
